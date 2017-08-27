@@ -1,49 +1,36 @@
 import React, { Component } from 'react';
-import { Get } from 'react-axios';
-
-let fetchedData = [];
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import * as UserActions from '../../actions/userActions';
+import Users from './Users';
 
 class Home extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      users: []
-    };
-  }
-
-  componentDidMount() {
-    console.log(fetchedData);
+  componentWillMount() {
+    this.props.dispatch.fetchUsers();
   }
 
   render() {
+    const fetchedUsers = this.props.users;
+
     return (
       <div>
         <h1>Home</h1>
-        <p>{this.props.dataApi + '/user'}</p>
-        <Get url={this.props.dataApi + '/user'}>
-          {(error, response, isLoading) => {
-            if(error) {
-              return (<div>Something bad happened: {error.message}</div>)
-            }
-            else if(isLoading) {
-              return (<div>Loading...</div>)
-            }
-            else if(response !== null) {
-              fetchedData = response.data.users;
-              return (<div>Success</div>)
-              // return (<ul>
-              //           {response.data.users.map((k, v) => {
-              //             return <li key={k}>{v}</li>
-              //           })}
-              //         </ul>)
-            }
-            return (<div>Default message before request is made.</div>)
-          }}
-        </Get>
+        <Users usersProps={fetchedUsers}/>
       </div>
     );
   }
 }
 
-export default Home;
+function mapStateToProps(state, props) {
+  return {
+    users: state.user.users
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    dispatch: bindActionCreators(UserActions, dispatch)
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
